@@ -5,7 +5,7 @@ import { Keypad } from '../components/Keypad';
 import { Difficulty, GameModeId, Question, GameSession } from '../types';
 import { generateQuestion, calculateScore } from '../services/gameLogic';
 import { useGame } from '../context/GameContext';
-import { DIFFICULTY_CONFIG } from '../constants';
+import { DIFFICULTY_CONFIG, THEMES } from '../constants';
 
 interface GameProps {
   mode: GameModeId;
@@ -16,6 +16,7 @@ interface GameProps {
 
 export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit }) => {
   const { state } = useGame();
+  const theme = THEMES[state.user.theme] || THEMES.jungle;
   
   // Game State
   const [session, setSession] = useState<GameSession>({
@@ -37,6 +38,12 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
   const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
   const [isPaused, setIsPaused] = useState(false);
   const [showHint, setShowHint] = useState(false);
+
+  const feedbackOverlayClass = feedback === 'correct'
+    ? 'bg-green-50/70'
+    : feedback === 'wrong'
+      ? 'bg-red-50/70'
+      : 'bg-transparent';
   
   const timerRef = useRef<number | null>(null);
 
@@ -146,10 +153,17 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
   if (!currentQuestion) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <div className={`h-full flex flex-col relative ${feedback === 'correct' ? 'bg-green-50' : feedback === 'wrong' ? 'bg-red-50' : ''} transition-colors duration-300`}>
-      
-      {/* Top Bar */}
-      <div className="flex justify-between items-center p-4">
+    <div
+      data-testid="game-screen"
+      className={`h-full flex flex-col relative ${theme.colors.bg} ${theme.colors.text}`}
+    >
+      <div
+        aria-hidden
+        className={`absolute inset-0 pointer-events-none transition-colors duration-300 ${feedbackOverlayClass}`}
+      />
+      <div className="relative h-full flex flex-col">
+        {/* Top Bar */}
+        <div className="flex justify-between items-center p-4">
         <button onClick={() => setIsPaused(true)} className="p-2 rounded-full bg-white shadow-sm">
           <Pause size={20} className="text-slate-400" />
         </button>
@@ -223,14 +237,14 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
         
       </div>
 
-      {/* Pause Modal */}
-      <Modal isOpen={isPaused} onClose={() => setIsPaused(false)} title="Game Paused">
-        <div className="flex flex-col gap-3">
-          <Button onClick={() => setIsPaused(false)}>Resume</Button>
-          <Button variant="danger" onClick={onExit}>Quit Game</Button>
-        </div>
-      </Modal>
-
+        {/* Pause Modal */}
+        <Modal isOpen={isPaused} onClose={() => setIsPaused(false)} title="Game Paused">
+          <div className="flex flex-col gap-3">
+            <Button onClick={() => setIsPaused(false)}>Resume</Button>
+            <Button variant="danger" onClick={onExit}>Quit Game</Button>
+          </div>
+        </Modal>
+      </div>
     </div>
   );
 };

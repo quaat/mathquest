@@ -46,7 +46,7 @@ const checkUnlocks = (user: UserStats): { user: UserStats; newBadges: Achievemen
   return { user: newUser, newBadges, newThemes };
 };
 
-const gameReducer = (state: GameState, action: Action): GameState => {
+export const gameReducer = (state: GameState, action: Action): GameState => {
   let newState = { ...state, achievedThisSession: [], themesUnlockedThisSession: [] };
 
   switch (action.type) {

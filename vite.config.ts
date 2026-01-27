@@ -9,6 +9,12 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
       },
+      test: {
+        environment: 'jsdom',
+        setupFiles: './test/setup.ts',
+        globals: true,
+        css: true,
+      },
       plugins: [react()],
       base: process.env.VITE_BASE ?? "/",
       define: {
