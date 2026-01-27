@@ -25,9 +25,18 @@ describe('gameLogic', () => {
   });
 
   describe('generateQuestion', () => {
-    it('uses boss tables only and standard questions for Beginner', () => {
+    it('uses boss tables and tougher factor ranges', () => {
+      const randomSpy = vi.spyOn(Math, 'random').mockImplementation(() => 0.1);
+      randomSpy
+        .mockReturnValueOnce(0) // factorA -> first table
+        .mockReturnValueOnce(0) // factorB -> min
+        .mockReturnValueOnce(0.1); // roll -> standard
+
       const question = generateQuestion('Beginner', 'boss');
-      expect([7, 8, 9, 12]).toContain(question.factorA);
+
+      expect([7, 8, 9, 11, 12, 13, 14, 15]).toContain(question.factorA);
+      expect(question.factorB).toBeGreaterThanOrEqual(6);
+      expect(question.factorB).toBeLessThanOrEqual(15);
       expect(question.type).toBe('standard');
       expect(question.answer).toBe(question.factorA * question.factorB);
       expect(question.textDisplay).toBe(`${question.factorA} × ${question.factorB} = ?`);

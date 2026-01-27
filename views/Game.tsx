@@ -29,7 +29,9 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
     questionsAnswered: 0,
     correctCount: 0,
     startTime: Date.now(),
-    timeLeft: DIFFICULTY_CONFIG[difficulty].timeLimit || 60,
+    timeLeft: mode === 'boss'
+      ? Math.min(DIFFICULTY_CONFIG[difficulty].timeLimit || 60, 30)
+      : (DIFFICULTY_CONFIG[difficulty].timeLimit || 60),
     history: []
   });
 
@@ -180,6 +182,13 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
           <span className="text-xl font-black text-indigo-600">{session.score}</span>
         </div>
       </div>
+      {mode === 'boss' && (
+        <div className="px-4 pb-2">
+          <div className="rounded-2xl bg-red-100 text-red-800 text-xs font-bold px-3 py-2 text-center">
+            Boss Run: tables 7–15, factors 6–15, faster timer
+          </div>
+        </div>
+      )}
 
       {/* Progress Bar (Journey & Daily Mode) */}
       {(mode === 'journey' || mode === 'daily') && (

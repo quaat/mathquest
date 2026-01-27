@@ -9,13 +9,18 @@ const seededRandom = (seed: number) => {
   return ((t ^ t >>> 14) >>> 0) / 4294967296;
 };
 
+const BOSS_TABLES = [7, 8, 9, 11, 12, 13, 14, 15];
+const BOSS_FACTOR_MIN = 6;
+const BOSS_FACTOR_MAX = 15;
+
 export const generateQuestion = (
-  difficulty: Difficulty, 
-  mode: GameModeId, 
+  difficulty: Difficulty,
+  mode: GameModeId,
   seed?: string
 ): Question => {
   const config = DIFFICULTY_CONFIG[difficulty];
-  const tables = mode === 'boss' ? [7, 8, 9, 12] : config.tables; // Boss rounds focus on hard tables
+  const isBoss = mode === 'boss';
+  const tables = isBoss ? BOSS_TABLES : config.tables; // Boss rounds focus on the hardest tables.
   
   let rng = Math.random;
   if (seed) {
@@ -29,12 +34,21 @@ export const generateQuestion = (
   }
 
   const factorA = tables[Math.floor(rng() * tables.length)];
-  const factorB = Math.floor(rng() * 12) + 1; // 1-12 range usually
+  const factorBRange = isBoss ? BOSS_FACTOR_MAX - BOSS_FACTOR_MIN + 1 : 12;
+  const factorBBase = isBoss ? BOSS_FACTOR_MIN : 1;
+  const factorB = Math.floor(rng() * factorBRange) + factorBBase;
   const product = factorA * factorB;
 
   // Determine question type based on difficulty/mode logic
   let type: Question['type'] = 'standard';
-  if (config.types.includes('reverse') && rng() > 0.7) {
+  if (isBoss) {
+    const roll = rng();
+    if (roll > 0.6) {
+      type = 'reverse';
+    } else if (roll > 0.2) {
+      type = 'missing';
+    }
+  } else if (config.types.includes('reverse') && rng() > 0.7) {
     type = 'reverse';
   } else if (config.types.includes('missing') && rng() > 0.6) {
     type = 'missing';
