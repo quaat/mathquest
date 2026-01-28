@@ -5,7 +5,7 @@ import { Keypad } from '../components/Keypad';
 import { Difficulty, GameModeId, Question, GameSession } from '../types';
 import { generateQuestion, calculateScore } from '../services/gameLogic';
 import { useGame } from '../context/GameContext';
-import { DIFFICULTY_CONFIG, THEMES } from '../constants';
+import { DIFFICULTY_RULES, THEMES } from '../constants';
 
 interface GameProps {
   mode: GameModeId;
@@ -30,8 +30,8 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
     correctCount: 0,
     startTime: Date.now(),
     timeLeft: mode === 'boss'
-      ? Math.min(DIFFICULTY_CONFIG[difficulty].timeLimit || 60, 30)
-      : (DIFFICULTY_CONFIG[difficulty].timeLimit || 60),
+      ? Math.min(DIFFICULTY_RULES[difficulty].timeLimit || 60, 30)
+      : (DIFFICULTY_RULES[difficulty].timeLimit || 60),
     history: []
   });
 
@@ -166,7 +166,11 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
       <div className="relative h-full flex flex-col">
         {/* Top Bar */}
         <div className="flex justify-between items-center p-4">
-        <button onClick={() => setIsPaused(true)} className="p-2 rounded-full bg-white shadow-sm">
+        <button
+          onClick={() => setIsPaused(true)}
+          className="p-2 rounded-full bg-white shadow-sm"
+          aria-label="Pause"
+        >
           <Pause size={20} className="text-slate-400" />
         </button>
         
@@ -185,7 +189,7 @@ export const Game: React.FC<GameProps> = ({ mode, difficulty, onEndGame, onExit 
       {mode === 'boss' && (
         <div className="px-4 pb-2">
           <div className="rounded-2xl bg-red-100 text-red-800 text-xs font-bold px-3 py-2 text-center">
-            Boss Run: tables 7–15, factors 6–15, faster timer
+            Boss Run: upper-range numbers, faster timer
           </div>
         </div>
       )}

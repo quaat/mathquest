@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { Game } from '../views/Game';
-import { GameProvider } from '../context/GameContext';
+import { Game } from '../../views/Game';
+import { GameProvider } from '../../context/GameContext';
 
 const STORAGE_KEY = 'mathquest_user_v1';
 

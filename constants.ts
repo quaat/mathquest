@@ -87,9 +87,42 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
-export const DIFFICULTY_CONFIG: Record<Difficulty, { tables: number[]; timeLimit?: number; types: string[] }> = {
-  Beginner: { tables: [1, 2, 3, 4, 5, 10], timeLimit: 90, types: ['standard'] },
-  Intermediate: { tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], timeLimit: 60, types: ['standard', 'missing'] },
-  Advanced: { tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], timeLimit: 45, types: ['standard', 'missing', 'reverse'] },
-  Expert: { tables: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], timeLimit: 30, types: ['standard', 'missing', 'reverse'] },
+export const DIFFICULTY_RULES: Record<
+  Difficulty,
+  {
+    range: { min: number; max: number };
+    timeLimit: number;
+    operations: { mul: number; div: number };
+    missingRate: number;
+    label: string;
+  }
+> = {
+  Beginner: {
+    range: { min: 1, max: 5 },
+    timeLimit: 90,
+    operations: { mul: 1, div: 0 },
+    missingRate: 0,
+    label: '1-5 multiplication',
+  },
+  Intermediate: {
+    range: { min: 2, max: 10 },
+    timeLimit: 60,
+    operations: { mul: 1, div: 0 },
+    missingRate: 0.35,
+    label: '2-10 multiplication',
+  },
+  Advanced: {
+    range: { min: 1, max: 12 },
+    timeLimit: 45,
+    operations: { mul: 0.6, div: 0.4 },
+    missingRate: 0.25,
+    label: 'Up to 12, multiplication + division',
+  },
+  Expert: {
+    range: { min: 1, max: 20 },
+    timeLimit: 30,
+    operations: { mul: 0.3, div: 0.7 },
+    missingRate: 0.2,
+    label: 'Up to 20, division-focused',
+  },
 };

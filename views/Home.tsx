@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Trophy, Clock, Zap, Star, Brain, CheckCircle } from 'lucide-react';
 import { Difficulty, GameModeId } from '../types';
 import { useGame } from '../context/GameContext';
+import { DIFFICULTY_RULES } from '../constants';
 
 interface HomeProps {
   onStartGame: (mode: GameModeId, diff: Difficulty) => void;
@@ -15,7 +16,7 @@ export const Home: React.FC<HomeProps> = ({ onStartGame, onNavigate }) => {
   const modes = [
     { id: 'journey', name: 'Journey', icon: <Star className="text-yellow-500" />, desc: 'Progressive levels' },
     { id: 'sprint', name: 'Sprint', icon: <Clock className="text-blue-500" />, desc: '60s Time Attack' },
-    { id: 'boss', name: 'Boss Run', icon: <Zap className="text-red-500" />, desc: 'Hard tables only' },
+    { id: 'boss', name: 'Boss Run', icon: <Zap className="text-red-500" />, desc: 'Upper-range pressure' },
     { id: 'chill', name: 'Chill', icon: <Brain className="text-emerald-500" />, desc: 'No timer practice' },
   ];
 
@@ -93,6 +94,9 @@ export const Home: React.FC<HomeProps> = ({ onStartGame, onNavigate }) => {
               {diff}
             </button>
           ))}
+        </div>
+        <div className="text-xs text-slate-500 font-semibold mt-2">
+          {DIFFICULTY_RULES[selectedDifficulty].label}
         </div>
       </div>
 
