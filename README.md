@@ -4,7 +4,7 @@ MathQuest is a browser-based multiplication game built with React and Vite. It t
 
 ## Gameplay overview
 - Game modes: Journey (20-question progression), Sprint (60s time attack), Boss Run (hard tables only), Chill (untimed practice), and a Daily Challenge with a seeded 20-question deck and double XP.
-- Difficulties: Beginner, Intermediate, Advanced, Expert with different table ranges and time limits.
+- Difficulties: Beginner (1-5 multiplication), Intermediate (2-10 multiplication), Advanced (up to 12 with division), Expert (up to 20, division-focused).
 - Question types: standard multiplication, missing factor, and reverse division prompts.
 - Scoring: base points by difficulty + time bonus + streak multiplier (up to 5x); Daily Challenge doubles points.
 - Progression: XP and levels, mastery per table, achievements, and unlockable themes.

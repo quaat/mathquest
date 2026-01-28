@@ -1,5 +1,6 @@
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
 export type GameModeId = 'sprint' | 'journey' | 'chill' | 'boss' | 'daily';
+export type Operation = 'mul' | 'div';
 
 export interface UserStats {
   xp: number;
@@ -18,6 +19,10 @@ export interface UserStats {
 export interface Question {
   id: string;
   type: 'standard' | 'missing' | 'reverse';
+  operation: Operation;
+  a: number;
+  b: number;
+  prompt: string;
   factorA: number;
   factorB: number;
   answer: number;

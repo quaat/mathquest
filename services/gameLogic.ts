@@ -1,5 +1,5 @@
 import { Difficulty, GameModeId, Question } from '../types';
-import { DIFFICULTY_CONFIG } from '../constants';
+import { DIFFICULTY_RULES } from '../constants';
 
 // Pseudo-random number generator for daily challenge
 const seededRandom = (seed: number) => {
@@ -9,18 +9,23 @@ const seededRandom = (seed: number) => {
   return ((t ^ t >>> 14) >>> 0) / 4294967296;
 };
 
-const BOSS_TABLES = [7, 8, 9, 11, 12, 13, 14, 15];
-const BOSS_FACTOR_MIN = 6;
-const BOSS_FACTOR_MAX = 15;
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const getBossRange = (min: number, max: number) => {
+  const midpoint = Math.floor((min + max) / 2);
+  return {
+    min: clamp(midpoint, min, max),
+    max,
+  };
+};
 
 export const generateQuestion = (
   difficulty: Difficulty,
   mode: GameModeId,
   seed?: string
 ): Question => {
-  const config = DIFFICULTY_CONFIG[difficulty];
+  const rule = DIFFICULTY_RULES[difficulty];
   const isBoss = mode === 'boss';
-  const tables = isBoss ? BOSS_TABLES : config.tables; // Boss rounds focus on the hardest tables.
   
   let rng = Math.random;
   if (seed) {
@@ -33,60 +38,60 @@ export const generateQuestion = (
       rng = () => seededRandom(hash++);
   }
 
-  const factorA = tables[Math.floor(rng() * tables.length)];
-  const factorBRange = isBoss ? BOSS_FACTOR_MAX - BOSS_FACTOR_MIN + 1 : 12;
-  const factorBBase = isBoss ? BOSS_FACTOR_MIN : 1;
-  const factorB = Math.floor(rng() * factorBRange) + factorBBase;
-  const product = factorA * factorB;
+  const range = isBoss ? getBossRange(rule.range.min, rule.range.max) : rule.range;
 
-  // Determine question type based on difficulty/mode logic
+  const operationRoll = rng() * (rule.operations.mul + rule.operations.div);
+  const operation: Question['operation'] = operationRoll < rule.operations.div ? 'div' : 'mul';
+  const shouldUseMissing = operation === 'mul' && rng() < rule.missingRate;
+
+  const pickOperand = () =>
+    Math.floor(rng() * (range.max - range.min + 1)) + range.min;
+  let factorA = pickOperand();
+  let factorB = pickOperand();
+  let product = factorA * factorB;
+
   let type: Question['type'] = 'standard';
-  if (isBoss) {
-    const roll = rng();
-    if (roll > 0.6) {
-      type = 'reverse';
-    } else if (roll > 0.2) {
-      type = 'missing';
-    }
-  } else if (config.types.includes('reverse') && rng() > 0.7) {
-    type = 'reverse';
-  } else if (config.types.includes('missing') && rng() > 0.6) {
-    type = 'missing';
-  }
-
-  // Create text representation
   let textDisplay = '';
   let hint = '';
   let expectedAnswer = product;
+  let operandA = factorA;
+  let operandB = factorB;
 
-  switch (type) {
-    case 'reverse':
-      textDisplay = `${product} ÷ ${factorA} = ?`;
-      hint = `Think: ${factorA} x ? = ${product}`;
+  if (operation === 'div') {
+    const divisor = rng() > 0.5 ? factorA : factorB;
+    const dividend = product;
+    const quotient = dividend / divisor;
+
+    type = 'reverse';
+    expectedAnswer = quotient;
+    operandA = dividend;
+    operandB = divisor;
+    textDisplay = `${dividend} ÷ ${divisor} = ?`;
+    hint = `Think: ${divisor} × ? = ${dividend}`;
+  } else if (shouldUseMissing) {
+    type = 'missing';
+    const missingFactorA = rng() > 0.5;
+    if (missingFactorA) {
+      textDisplay = `? × ${factorB} = ${product}`;
+      expectedAnswer = factorA;
+      hint = `Count by ${factorB}s until you reach ${product}`;
+    } else {
+      textDisplay = `${factorA} × ? = ${product}`;
       expectedAnswer = factorB;
-      break;
-    case 'missing':
-      const missingFactorA = rng() > 0.5;
-      if (missingFactorA) {
-        textDisplay = `? × ${factorB} = ${product}`;
-        expectedAnswer = factorA;
-        hint = `Count by ${factorB}s until you reach ${product}`;
-      } else {
-        textDisplay = `${factorA} × ? = ${product}`;
-        expectedAnswer = factorB;
-        hint = `Count by ${factorA}s until you reach ${product}`;
-      }
-      break;
-    default:
-      textDisplay = `${factorA} × ${factorB} = ?`;
-      hint = `Add ${factorA} to itself ${factorB} times.`;
-      expectedAnswer = product;
-      break;
+      hint = `Count by ${factorA}s until you reach ${product}`;
+    }
+  } else {
+    textDisplay = `${factorA} × ${factorB} = ?`;
+    hint = `Add ${factorA} to itself ${factorB} times.`;
   }
 
   return {
     id: Date.now().toString() + Math.random().toString(),
     type,
+    operation,
+    a: operandA,
+    b: operandB,
+    prompt: textDisplay,
     factorA,
     factorB,
     answer: expectedAnswer, // The user must match this

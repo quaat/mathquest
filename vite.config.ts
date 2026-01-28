@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => {
         setupFiles: './test/setup.ts',
         globals: true,
         css: true,
+        coverage: {
+          provider: 'v8',
+          reporter: ['text', 'html'],
+          reportsDirectory: './coverage',
+        },
       },
       plugins: [react()],
       base: process.env.VITE_BASE ?? "/",
